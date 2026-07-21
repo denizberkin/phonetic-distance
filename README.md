@@ -9,6 +9,7 @@ initialization and normalization, with a standalone Dynamic Time Warping
 
 - Python 3.11+
 - NumPy
+- Matplotlib and Pillow (visualizations only)
 
 The examples below use the existing `test` Conda environment. Replace
 `conda run -n test python` with your Python executable if using another
@@ -182,6 +183,26 @@ This writes `outputs/english_to_greek.svg`. Darker cells represent lower
 phonetic costs.
 This is just a replication script of conference paper cost matrix diagram.
 
+### Training animations
+
+Animate the matrix throughout training and the DTW cost/path for the exact
+dataset pair allegro → αλεγκρό:
+
+    python scripts/visualize_training_epochs.py
+
+The script repeats the configured deterministic Greek training run and writes
+both GIFs to assets/. Epoch 0 is the co-occurrence initialization; later
+frames are the learned matrices after each training epoch. Color scales stay
+fixed across frames so changes are directly comparable.
+
+#### Cost matrix over training
+
+![English-to-Greek cost matrix over training](assets/english_to_greek_epochs.gif)
+
+#### Case Pair: allegro-αλϵγκρo alignment over training
+
+![DTW cost and path for allegro to αλεγκρό](assets/allegro_to_greek_path.gif)
+
 ## Check
 
 Run the training checks via:
@@ -195,3 +216,10 @@ python tests/test_training.py
 The method implemented here is based on
 [Cross-Lingual Phonetic Distance Learning via Transliteration Pairs](https://doi.org/10.1109/SIU66497.2025.11112305),
 published through IEEE.
+
+
+
+# NOTES
+
+To 9. Multi candidate results add:
+- black dot shows bla bla, blue line shows bla bla short legend.
