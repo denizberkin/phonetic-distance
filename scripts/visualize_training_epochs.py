@@ -1,4 +1,4 @@
-'''Animate English-to-Greek cost learning and one example DTW path.'''
+'''Animate English-to-target cost learning and one example DTW path.'''
 
 from __future__ import annotations
 
@@ -11,6 +11,8 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
+from matplotlib.collections import LineCollection
+from matplotlib.lines import Line2D
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -24,7 +26,12 @@ from utils.training import train_cost_matrix
 
 ROOT = Path(__file__).parent.parent
 ENGLISH = tuple(chr(39) + 'abcdefghijklmnopqrstuvwxyz')
-GREEK = tuple(chr(39) + '\u03b1\u03b2\u03b3\u03b4\u03b5\u03b6\u03b7\u03b8\u03b9\u03ba\u03bb\u03bc\u03bd\u03be\u03bf\u03c0\u03c1\u03c2\u03c3\u03c4\u03c5\u03c6\u03c7\u03c8\u03c9')
+TARGET_ALPHABETS = {
+    'greek': tuple(chr(39) + '\u03b1\u03b2\u03b3\u03b4\u03b5\u03b6\u03b7\u03b8\u03b9\u03ba\u03bb\u03bc\u03bd\u03be\u03bf\u03c0\u03c1\u03c2\u03c3\u03c4\u03c5\u03c6\u03c7\u03c8\u03c9'),
+    'russian': tuple(chr(39) + '\u0430\u0431\u0432\u0433\u0434\u0435\u0451\u0436\u0437\u0438\u0439\u043a\u043b\u043c\u043d\u043e\u043f\u0440\u0441\u0442\u0443\u0444\u0445\u0446\u0447\u0448\u0449\u044a\u044b\u044c\u044d\u044e\u044f'),
+}
+EXAMPLE_SOURCES = {'greek': 'allegro', 'russian': 'ashenfelter'}
+STEP_COLORS = {'one': '#6c757d', 'many_to_one': '#ef476f', 'one_to_many': '#118ab2'}
 FPS = 2
 
 
@@ -40,10 +47,12 @@ def save_matrix_animation(
     history: list[tuple[int, np.ndarray]],
     source_symbols: tuple[str, ...],
     target_symbols: tuple[str, ...],
+    target_alphabet: tuple[str, ...],
+    target_language: str,
     output_path: Path,
 ) -> None:
     sources, source_indices = _visible_axis(source_symbols, ENGLISH)
-    targets, target_indices = _visible_axis(target_symbols, GREEK)
+    targets, target_indices = _visible_axis(target_symbols, target_alphabet)
     frames = [matrix[np.ix_(source_indices, target_indices)] for _, matrix in history]
     low = min(float(frame.min()) for frame in frames)
     high = max(float(frame.max()) for frame in frames)
@@ -55,7 +64,8 @@ def save_matrix_animation(
     )
     axis.set_xticks(range(len(targets)), labels=targets)
     axis.set_yticks(range(len(sources)), labels=sources)
-    axis.set_xlabel('Greek character')
+    target_name = target_language.title()
+    axis.set_xlabel(f'{target_name} character')
     axis.set_ylabel('English character')
     title = axis.set_title('')
     figure.colorbar(image, ax=axis, label='phonetic cost (darker = lower)')
@@ -63,7 +73,7 @@ def save_matrix_animation(
     def update(frame_index: int):
         epoch, _ = history[frame_index]
         image.set_data(frames[frame_index])
-        title.set_text(f'English → Greek cost matrix · epoch {epoch}')
+        title.set_text(f'English → {target_name} cost matrix · epoch {epoch}')
         return image, title
 
     animation = FuncAnimation(figure, update, frames=len(frames), interval=500)
@@ -78,6 +88,7 @@ def save_pair_animation(
     target_symbols: tuple[str, ...],
     source: str,
     target: str,
+    target_language: str,
     output_path: Path,
 ) -> None:
     source_index = {symbol: index for index, symbol in enumerate(source_symbols)}
@@ -120,13 +131,15 @@ def save_pair_animation(
     )
     path_axis.set_xticks(range(len(target)), labels=target)
     path_axis.set_yticks(range(len(source)), labels=source)
-    path_axis.set_xlabel('Greek target')
+    path_axis.set_xlabel(f'{target_language.title()} target')
     path_axis.set_ylabel('English source')
     path_axis.set_xticks(np.arange(-0.5, len(target), 1), minor=True)
     path_axis.set_yticks(np.arange(-0.5, len(source), 1), minor=True)
     path_axis.grid(which='minor', color='white', linewidth=0.6, alpha=0.65)
     path_axis.tick_params(which='minor', bottom=False, left=False)
-    path_line, = path_axis.plot([], [], 'o-', color='#ef476f', linewidth=2.5)
+    path_segments = LineCollection([], linewidths=2.8, zorder=3)
+    path_axis.add_collection(path_segments)
+    path_dots, = path_axis.plot([], [], 'o', color='black', markersize=4, zorder=4)
     labels = [
         path_axis.text(column, row, '', ha='center', va='center', fontsize=8)
         for row in range(len(source))
@@ -146,22 +159,44 @@ def save_pair_animation(
     cost_axis.set_ylabel('DTW cost')
     cost_axis.set_title('Pair cost over training')
     cost_axis.grid(alpha=0.25)
+    cost_axis.legend(
+        handles=[
+            Line2D([], [], color=STEP_COLORS['one'], label='one-to-one'),
+            Line2D([], [], color=STEP_COLORS['many_to_one'], label='many Latin → one target'),
+            Line2D([], [], color=STEP_COLORS['one_to_many'], label='one Latin → many target'),
+        ],
+        loc='upper right',
+        fontsize=8,
+    )
 
     def update(frame_index: int):
         epoch, pair_costs, total, path = frames[frame_index]
         image.set_data(pair_costs)
         for label, value in zip(labels, pair_costs.flat):
             label.set_text(f'{value:.2f}')
-        path_line.set_data(
-            [target_position for _, target_position, _ in path],
-            [source_position for source_position, _, _ in path],
+        points = np.array(
+            [(target_position, source_position) for source_position, target_position, _ in path]
         )
+        segments = np.stack((points[:-1], points[1:]), axis=1)
+        steps = np.diff(points, axis=0)
+        path_segments.set_segments(segments)
+        path_segments.set_color(
+            [
+                STEP_COLORS['many_to_one']
+                if target_step == 0
+                else STEP_COLORS['one_to_many']
+                if source_step == 0
+                else STEP_COLORS['one']
+                for target_step, source_step in steps
+            ]
+        )
+        path_dots.set_data(points[:, 0], points[:, 1])
         title.set_text(
             f'{source} → {target} · epoch {epoch}\nDTW cost = {total:.3f}'
         )
         cost_line.set_data(epochs[: frame_index + 1], totals[: frame_index + 1])
         cursor.set_data([epoch], [total])
-        return image, path_line, title, cost_line, cursor, *labels
+        return image, path_segments, path_dots, title, cost_line, cursor, *labels
 
     animation = FuncAnimation(figure, update, frames=len(frames), interval=500)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -171,17 +206,26 @@ def save_pair_animation(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description='Animate English-to-Greek cost-matrix training.'
+        description='Animate English-to-target cost-matrix training.'
     )
     parser.add_argument('--config', type=Path, default=DEFAULT_CONFIG_PATH)
     parser.add_argument('--output-dir', type=Path, default=ROOT / 'assets')
+    parser.add_argument(
+        '--language', choices=TARGET_ALPHABETS, default='greek'
+    )
+    parser.add_argument('--source', help='Dataset source example to animate')
     args = parser.parse_args()
 
     settings = read_settings(args.config)
-    records = load_datasets(args.config, ['greek'])['greek']
-    example = next(record for record in records if record.source == 'allegro')
+    language = args.language
+    records = load_datasets(args.config, [language])[language]
+    example_source = args.source or EXAMPLE_SOURCES[language]
+    try:
+        example = next(record for record in records if record.source == example_source)
+    except StopIteration:
+        raise SystemExit(f'No {language} pair has source {example_source!r}')
     training_records = _training_records(
-        records.copy(), settings.train_fraction, settings.random_seed, 'greek'
+        records.copy(), settings.train_fraction, settings.random_seed, language
     )
     history: list[tuple[int, np.ndarray]] = []
     result = train_cost_matrix(
@@ -194,10 +238,15 @@ def main() -> None:
         on_epoch=lambda epoch, matrix: history.append((epoch, matrix)),
     )
 
-    matrix_path = args.output_dir / 'english_to_greek_epochs.gif'
-    pair_path = args.output_dir / 'allegro_to_greek_path.gif'
+    matrix_path = args.output_dir / f'english_to_{language}_epochs.gif'
+    pair_path = args.output_dir / f'{example.source}_to_{language}_path.gif'
     save_matrix_animation(
-        history, result.source_symbols, result.target_symbols, matrix_path
+        history,
+        result.source_symbols,
+        result.target_symbols,
+        TARGET_ALPHABETS[language],
+        language,
+        matrix_path,
     )
     save_pair_animation(
         history,
@@ -205,6 +254,7 @@ def main() -> None:
         result.target_symbols,
         example.source,
         example.target,
+        language,
         pair_path,
     )
     print(matrix_path)
