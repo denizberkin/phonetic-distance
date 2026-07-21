@@ -43,6 +43,7 @@ def train_cost_matrix(
     max_iterations: int,
     tolerance: float,
     on_iteration: Callable[[int, float], None] | None = None,
+    on_epoch: Callable[[int, np.ndarray], None] | None = None,
 ) -> TrainingResult:
     """Learn a directional character cost matrix with Algorithms 1 and 2."""
 
@@ -62,6 +63,8 @@ def train_cost_matrix(
     for source, target in encoded:
         np.add.at(weights, (source[:, None], target[None, :]), 1)
     costs = _costs_from_weights(weights)
+    if on_epoch:
+        on_epoch(0, costs.copy())
 
     previous_normalized: float | None = None
     converged = False
@@ -80,6 +83,8 @@ def train_cost_matrix(
         if on_iteration:
             on_iteration(iteration, normalized_cost)
         costs = _costs_from_weights(next_weights)
+        if on_epoch:
+            on_epoch(iteration, costs.copy())
 
         if (
             previous_normalized is not None

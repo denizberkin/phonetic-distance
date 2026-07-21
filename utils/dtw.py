@@ -14,6 +14,7 @@ def dtw(
     costs: np.ndarray,
     *,
     return_path: bool = False,
+    return_positions: bool = False,
 ) -> float | tuple[float, DTWPath]:
     """Return minimum cost and optionally its forward ``(s, t, c)`` path."""
 
@@ -53,7 +54,10 @@ def dtw(
     path: DTWPath = []
     i, j = len(source) - 1, width - 1
     while True:
-        path.append((int(source[i]), int(target[j]), pair_costs[i][j]))
+        source_step, target_step = (
+            (i, j) if return_positions else (int(source[i]), int(target[j]))
+        )
+        path.append((source_step, target_step, pair_costs[i][j]))
         if i == 0 and j == 0:
             break
         step = back[i * width + j]

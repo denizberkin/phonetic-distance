@@ -19,18 +19,30 @@ def test_training() -> None:
     assert dtw(source, target, costs) == 2.0
     total, path = dtw(source, target, costs, return_path=True)
     assert path == [(0, 0, 1.0), (1, 1, 1.0)]
+    _, positions = dtw(
+        np.array((0, 0, 1)),
+        target,
+        costs,
+        return_path=True,
+        return_positions=True,
+    )
+    assert positions == [(0, 0, 1.0), (1, 0, 1.0), (2, 1, 1.0)]
     _accumulate_path(weights, path)
     assert total == 2.0
     assert np.array_equal(weights, ((1, 0), (0, 1)))
 
     normalized_costs = []
+    epochs = []
     result = train_cost_matrix(
         [("ab", "αβ"), ("ac", "αγ"), ("db", "δβ"), ("dc", "δγ")],
         max_iterations=5,
         tolerance=1e-5,
         on_iteration=lambda _, cost: normalized_costs.append(cost),
+        on_epoch=lambda epoch, matrix: epochs.append((epoch, matrix)),
     )
     assert normalized_costs
+    assert [epoch for epoch, _ in epochs] == list(range(result.iterations + 1))
+    assert all(np.isfinite(matrix).all() for _, matrix in epochs)
     assert result.costs.shape == (
         len(result.source_symbols),
         len(result.target_symbols),
