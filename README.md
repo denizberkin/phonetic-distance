@@ -5,6 +5,13 @@ entity transliteration pairs. The implementation uses NumPy for matrix
 initialization and normalization, with a standalone Dynamic Time Warping
 (DTW) implementation for alignment and path extraction.
 
+All Contributors: [Can Ozbey](https://www.researchgate.net/profile/Can-Oezbey)$^1$, [Emre Kaplan](https://scholar.google.com/citations?user=Att_7UQAAAAJ)$^1$, [Berkin Deniz Kahya](https://scholar.google.com/citations?user=TQrCibcAAAAJ)$^{1,2,3}$
+
+
+$^1$ [Huawei Technologies](https://www.huawei.com/)
+$^2$ [Istanbul Technical University](https://www.itu.edu.tr/)
+$^3$ [Inzva](https://inzva.com/)
+
 ## Project website
 
 The interactive project overview and training animations are published at
