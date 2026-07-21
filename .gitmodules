@@ -1,0 +1,6 @@
+[submodule "data/deepchar"]
+	path = data/deepchar
+	url = https://github.com/denizberkin/deepchar.git
+[submodule "data/netranslation-coling2018"]
+	path = data/netranslation-coling2018
+	url = https://github.com/denizberkin/NETransliteration-COLING2018.git

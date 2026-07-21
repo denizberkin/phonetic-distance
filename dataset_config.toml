@@ -1,0 +1,30 @@
+[data]
+# Each value is the <language> part of wd_<language>*.tokens.
+languages = ["katakana", "russian", "armenian", "greek"]
+
+# Roots are searched in order for languages that are not explicitly pinned below.
+roots = [
+  "data/netranslation-coling2018/data",
+  "data/deepchar/data",
+]
+
+# Only files ending in normalized.aligned.tokens are accepted by the loader.
+file_pattern = "wd_{language}.normalized.aligned.tokens"
+encoding = "utf-8"
+
+# The paper uses the COLING source for Russian and Katakana 
+# and DeepChar for Armenian and Greek. 
+# Add an entry here when the same language exists in more than one data root 
+# and a particular source is required.
+[data.language_roots]
+katakana = "data/netranslation-coling2018/data"
+russian = "data/netranslation-coling2018/data"
+armenian = "data/deepchar/data"
+greek = "data/deepchar/data"
+
+[training]
+output_dir = "outputs"
+train_fraction = 0.7
+random_seed = 0
+max_iterations = 25
+convergence_tolerance = 1e-5
