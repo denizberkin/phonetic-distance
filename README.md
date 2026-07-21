@@ -5,6 +5,16 @@ entity transliteration pairs. The implementation uses NumPy for matrix
 initialization and normalization, with a standalone Dynamic Time Warping
 (DTW) implementation for alignment and path extraction.
 
+#### Cost matrix over training
+
+![English-to-Greek cost matrix over training](assets/english_to_greek_epochs.gif)
+
+#### Case Pair: allegro-αλϵγκρo alignment over training
+
+![DTW cost and path for allegro to αλεγκρό](assets/allegro_to_greek_path.gif)
+
+Refer to [visualization section in readme](#visualization) for more details.
+
 ## Requirements
 
 - Python 3.11+
@@ -179,7 +189,7 @@ Generate the paper-style English-to-Greek heatmap:
 python scripts/visualize_english_greek.py
 ```
 
-This writes `outputs/english_to_greek.svg`. Darker cells represent lower
+This writes `assets/english_to_greek.svg`. Darker cells represent lower
 phonetic costs.
 This is just a replication script of conference paper cost matrix diagram.
 
@@ -194,14 +204,6 @@ The script repeats the configured deterministic Greek training run and writes
 both GIFs to assets/. Epoch 0 is the co-occurrence initialization; later
 frames are the learned matrices after each training epoch. Color scales stay
 fixed across frames so changes are directly comparable.
-
-#### Cost matrix over training
-
-![English-to-Greek cost matrix over training](assets/english_to_greek_epochs.gif)
-
-#### Case Pair: allegro-αλϵγκρo alignment over training
-
-![DTW cost and path for allegro to αλεγκρό](assets/allegro_to_greek_path.gif)
 
 ## Check
 

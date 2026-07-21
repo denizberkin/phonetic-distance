@@ -68,7 +68,7 @@ def render_matrix(matrix_path: Path, output_path: Path) -> None:
 def main() -> None:
     settings = read_settings(DEFAULT_CONFIG_PATH)
     matrix_path = settings.output_dir / "english_to_greek.json"
-    output_path = settings.output_dir / "english_to_greek.svg"
+    output_path = Path(__file__).parent.parent / "assets" / "english_to_greek.svg"
     render_matrix(matrix_path, output_path)
     print(output_path)
 
