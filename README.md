@@ -9,9 +9,13 @@ initialization and normalization, with a standalone Dynamic Time Warping
 
 ![English-to-Greek cost matrix over training](assets/english_to_greek_epochs.gif)
 
-#### Case Pair: allegro-αλϵγκρo alignment over training
+#### Case Pair #1: allegro-αλϵγκρo alignment over training
 
 ![DTW cost and path for allegro to αλεγκρό](assets/allegro_to_greek_path.gif)
+
+#### Case pair #2: allegro-アッレグロ
+
+![DTW path for allegro to アッレグロ](assets/allegro_to_katakana_path.gif)
 
 Refer to [visualization section in readme](#visualization) for more details.
 
@@ -201,9 +205,26 @@ dataset pair allegro → αλεγκρό:
     python scripts/visualize_training_epochs.py
 
 The script repeats the configured deterministic Greek training run and writes
-both GIFs to assets/. Epoch 0 is the co-occurrence initialization; later
-frames are the learned matrices after each training epoch. Color scales stay
-fixed across frames so changes are directly comparable.
+both GIFs plus a vector first/final pair panel to `assets/`. Epoch 0 is the
+co-occurrence initialization; later frames are the learned matrices after each
+training epoch. Color scales stay fixed across frames so changes are directly
+comparable. Generate only the poster-ready vector panel with:
+
+    python scripts/visualize_training_epochs.py --static-only
+
+Generate the corresponding Russian animations with the held-out dataset pair
+`ashenfelter → ашенфельтер`:
+
+    python scripts/visualize_training_epochs.py --language russian
+
+Its final path contains both `sh → ш` (many Latin characters to one Cyrillic
+character) and `l → ль` (one Latin character to many Cyrillic characters).
+Gray, pink, and blue path segments show one-to-one, many-to-one, and
+one-to-many steps respectively.
+
+Katakana is supported too; its default example is `mozart → モーツァルト`:
+
+    python scripts/visualize_training_epochs.py --language katakana
 
 ## Check
 
