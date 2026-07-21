@@ -14,6 +14,26 @@ The examples below use the existing `test` Conda environment. Replace
 `conda run -n test python` with your Python executable if using another
 environment.
 
+## Clone
+
+Clone the code without downloading the dataset submodules:
+
+```shell
+git clone https://github.com/denizberkin/phonetic-distance.git
+```
+
+Clone the code and download both dataset submodules:
+
+```shell
+git clone --recurse-submodules https://github.com/denizberkin/phonetic-distance.git
+```
+
+If the repository was already cloned without them, download them later with:
+
+```shell
+git submodule update --init --recursive
+```
+
 ## Data
 
 The loader reads only exact files named:
@@ -155,7 +175,7 @@ frequencies.
 Generate the paper-style English-to-Greek heatmap:
 
 ```shell
-conda run -n test python -B scripts\visualize_english_greek.py
+python scripts/visualize_english_greek.py
 ```
 
 This writes `outputs/english_to_greek.svg`. Darker cells represent lower
@@ -167,11 +187,11 @@ This is just a replication script of conference paper cost matrix diagram.
 Run the training checks via:
 
 ```shell
-conda run -n test python -B tests\test_training.py
+python tests/test_training.py
 ```
 
 ## Reference
 
 The method implemented here is based on
-[Cross-Lingual Phonetic Distance Learning via Transliteration Pairs](https://ieeexplore.ieee.org/document/11112305),
+[Cross-Lingual Phonetic Distance Learning via Transliteration Pairs](https://doi.org/10.1109/SIU66497.2025.11112305),
 published through IEEE.
