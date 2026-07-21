@@ -9,6 +9,7 @@ import sys
 import matplotlib
 
 matplotlib.use('Agg')
+from matplotlib import font_manager
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 from matplotlib.collections import LineCollection
@@ -29,8 +30,17 @@ ENGLISH = tuple(chr(39) + 'abcdefghijklmnopqrstuvwxyz')
 TARGET_ALPHABETS = {
     'greek': tuple(chr(39) + '\u03b1\u03b2\u03b3\u03b4\u03b5\u03b6\u03b7\u03b8\u03b9\u03ba\u03bb\u03bc\u03bd\u03be\u03bf\u03c0\u03c1\u03c2\u03c3\u03c4\u03c5\u03c6\u03c7\u03c8\u03c9'),
     'russian': tuple(chr(39) + '\u0430\u0431\u0432\u0433\u0434\u0435\u0451\u0436\u0437\u0438\u0439\u043a\u043b\u043c\u043d\u043e\u043f\u0440\u0441\u0442\u0443\u0444\u0445\u0446\u0447\u0448\u0449\u044a\u044b\u044c\u044d\u044e\u044f'),
+    'katakana': tuple(
+        chr(39)
+        + ''.join(chr(codepoint) for codepoint in range(0x30A1, 0x30FB))
+        + '\u30fc'
+    ),
 }
-EXAMPLE_SOURCES = {'greek': 'allegro', 'russian': 'ashenfelter'}
+EXAMPLE_SOURCES = {
+    'greek': 'allegro',
+    'russian': 'ashenfelter',
+    'katakana': 'mozart',
+}
 STEP_COLORS = {'one': '#6c757d', 'many_to_one': '#ef476f', 'one_to_many': '#118ab2'}
 FPS = 2
 
@@ -204,6 +214,125 @@ def save_pair_animation(
     plt.close(figure)
 
 
+def save_pair_progression(
+    history: list[tuple[int, np.ndarray]],
+    source_symbols: tuple[str, ...],
+    target_symbols: tuple[str, ...],
+    source: str,
+    target: str,
+    target_language: str,
+    output_path: Path,
+) -> None:
+    """Save the first and final pair-cost/path frames as a vector PDF."""
+    source_index = {symbol: index for index, symbol in enumerate(source_symbols)}
+    target_index = {symbol: index for index, symbol in enumerate(target_symbols)}
+    encoded_source = np.array([source_index[char] for char in source])
+    encoded_target = np.array([target_index[char] for char in target])
+
+    frames = []
+    for epoch, matrix in history:
+        pair_costs = matrix[encoded_source[:, None], encoded_target]
+        total, path = dtw(
+            encoded_source,
+            encoded_target,
+            matrix,
+            return_path=True,
+            return_positions=True,
+        )
+        frames.append((epoch, pair_costs, total, path))
+
+    low = min(float(frame[1].min()) for frame in frames)
+    high = max(float(frame[1].max()) for frame in frames)
+    high = high if high > low else low + 1
+    colors = plt.get_cmap('viridis_r')(np.linspace(0, 1, 256))
+    colors[:, :3] = 0.78 * colors[:, :3] + 0.22
+    light_cmap = matplotlib.colors.ListedColormap(colors)
+    figure, axes = plt.subplots(
+        1,
+        2,
+        figsize=(8.2, 3.9),
+        gridspec_kw={'wspace': 0.08},
+        layout='constrained',
+    )
+
+    for index, (axis, frame) in enumerate(
+        zip(axes, (frames[0], frames[-1]))
+    ):
+        epoch, pair_costs, total, path = frame
+        axis.pcolormesh(
+            pair_costs,
+            cmap=light_cmap,
+            vmin=low,
+            vmax=high,
+            edgecolors='white',
+            linewidth=0.7,
+        )
+        axis.set_xlim(0, len(target))
+        axis.set_ylim(len(source), 0)
+        axis.set_aspect('equal')
+        axis.set_xticks(np.arange(len(target)) + 0.5, labels=target, fontsize=11)
+        axis.set_yticks(np.arange(len(source)) + 0.5, labels=source, fontsize=11)
+        axis.set_xlabel(f'{target_language.title()} target', fontsize=12)
+        if index == 0:
+            axis.set_ylabel('English source', fontsize=12)
+        else:
+            axis.tick_params(axis='y', labelleft=False)
+        for (row, column), value in np.ndenumerate(pair_costs):
+            axis.text(
+                column + 0.5,
+                row + 0.5,
+                f'{value:.2f}',
+                ha='center',
+                va='center',
+                color='black',
+                fontsize=8.2,
+                fontweight='normal',
+            )
+        points = np.array(
+            [
+                (target_position, source_position)
+                for source_position, target_position, _ in path
+            ]
+        ) + 0.5
+        axis.plot(
+            points[:, 0],
+            points[:, 1],
+            '-o',
+            color='#ef476f',
+            linewidth=2.5,
+            markersize=3.5,
+            zorder=3,
+        )
+        label = 'Initialization' if index == 0 else 'Converged'
+        axis.set_title(
+            f'{label} · epoch {epoch}\nDTW cost = {total:.3f}',
+            fontsize=13,
+            fontweight='normal',
+        )
+
+    figure.canvas.draw()
+    left_box = axes[0].get_position()
+    right_box = axes[1].get_position()
+    figure.text(
+        (left_box.x1 + right_box.x0) / 2,
+        (left_box.y0 + left_box.y1) / 2,
+        r'$\longrightarrow$',
+        ha='center',
+        va='center',
+        color='#2E6F9E',
+        fontsize=24,
+    )
+    figure.suptitle(
+        f'{source} → {target}: first and final DTW paths',
+        fontsize=16,
+        fontweight='bold',
+        color='#17324D',
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(output_path, bbox_inches='tight')
+    plt.close(figure)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description='Animate English-to-target cost-matrix training.'
@@ -214,10 +343,28 @@ def main() -> None:
         '--language', choices=TARGET_ALPHABETS, default='greek'
     )
     parser.add_argument('--source', help='Dataset source example to animate')
+    parser.add_argument(
+        '--static-only',
+        action='store_true',
+        help='write only the vector first/final pair panel',
+    )
     args = parser.parse_args()
 
     settings = read_settings(args.config)
     language = args.language
+    if language == 'katakana':
+        available_fonts = {font.name for font in font_manager.fontManager.ttflist}
+        japanese_font = next(
+            (
+                name
+                for name in ('Noto Sans JP', 'Yu Gothic', 'Meiryo', 'MS Gothic')
+                if name in available_fonts
+            ),
+            None,
+        )
+        if japanese_font is None:
+            raise SystemExit('Install a Japanese font such as Noto Sans JP')
+        matplotlib.rcParams['font.family'] = japanese_font
     records = load_datasets(args.config, [language])[language]
     example_source = args.source or EXAMPLE_SOURCES[language]
     try:
@@ -237,6 +384,22 @@ def main() -> None:
         ),
         on_epoch=lambda epoch, matrix: history.append((epoch, matrix)),
     )
+
+    progression_path = (
+        args.output_dir / f'{example.source}_to_{language}_progression.pdf'
+    )
+    save_pair_progression(
+        history,
+        result.source_symbols,
+        result.target_symbols,
+        example.source,
+        example.target,
+        language,
+        progression_path,
+    )
+    print(progression_path)
+    if args.static_only:
+        return
 
     matrix_path = args.output_dir / f'english_to_{language}_epochs.gif'
     pair_path = args.output_dir / f'{example.source}_to_{language}_path.gif'
