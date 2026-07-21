@@ -12,7 +12,6 @@ $^1$ [Huawei Technologies](https://www.huawei.com/)
 $^2$ [Istanbul Technical University](https://www.itu.edu.tr/)
 $^3$ [Inzva](https://inzva.com/)
 
-Then open <http://localhost:8000>.
 
 #### Cost matrix over training
 
@@ -38,6 +37,8 @@ The static site source lives in [`docs/`](docs/) and can be previewed locally wi
 ```shell
 python -m http.server 8000 --directory docs
 ```
+
+Then open <http://localhost:8000>.
 
 ## Requirements
 
