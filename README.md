@@ -5,6 +5,18 @@ entity transliteration pairs. The implementation uses NumPy for matrix
 initialization and normalization, with a standalone Dynamic Time Warping
 (DTW) implementation for alignment and path extraction.
 
+## Project website
+
+The interactive project overview and training animations are published at
+[denizberkin.github.io/phonetic-distance](https://denizberkin.github.io/phonetic-distance/).
+The static site source lives in [`docs/`](docs/) and can be previewed locally with:
+
+```shell
+python -m http.server 8000 --directory docs
+```
+
+Then open <http://localhost:8000>.
+
 #### Cost matrix over training
 
 ![English-to-Greek cost matrix over training](assets/english_to_greek_epochs.gif)

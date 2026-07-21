@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learned cross-lingual phonetic edit costs and DTW alignments from transliteration pairs.">
+  <meta name="theme-color" content="#17324d">
+  <link rel="canonical" href="https://denizberkin.github.io/phonetic-distance/">
+  <link rel="stylesheet" href="styles.css">
+  <title>Cross-Lingual Phonetic Distance</title>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav shell" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="Phonetic Edit Distance home">
+        <span class="brand-mark" aria-hidden="true">φ</span>
+        <span>Phonetic Edit Distance</span>
+      </a>
+      <div class="nav-links">
+        <a href="#method">Method</a>
+        <a href="#visualizations">Visualizations</a>
+        <a href="#results">Results</a>
+        <a href="#reproduce">Reproduce</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="hero shell" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow">Research project · IEEE SIU 2025</p>
+        <h1>Cross-Lingual Phonetic Distance Learning <span>via Transliteration Pairs</span></h1>
+        <p class="lede">
+          We learn directional character-edit costs directly from paired names, then use
+          Dynamic Time Warping to align and compare words written in different scripts—without
+          IPA labels or hand-crafted character correspondences.
+        </p>
+        <p class="authors">Can Özbey · Emre Kaplan · Berkin Deniz Kahya</p>
+        <p class="affiliations">Huawei · Istanbul Technical University · inzva</p>
+        <div class="actions">
+          <a class="button primary" href="https://doi.org/10.1109/SIU66497.2025.11112305">Read the paper</a>
+          <a class="button secondary" href="https://github.com/denizberkin/phonetic-distance">View the code</a>
+        </div>
+        <ul class="script-list" aria-label="Target writing systems">
+          <li>Greek</li>
+          <li>Armenian</li>
+          <li>Russian</li>
+          <li>Katakana</li>
+        </ul>
+      </div>
+
+      <div class="hero-demo" aria-label="Example learned alignment from Latin allegro to Greek alpha lambda epsilon gamma kappa rho omicron with tonos">
+        <p class="demo-label">A learned cross-script alignment</p>
+        <div class="word latin-word">
+          <span>Latin source</span>
+          <strong>allegro</strong>
+        </div>
+        <div class="pair-arrow" aria-hidden="true">
+          <span></span><b>DTW</b><span></span>
+        </div>
+        <div class="word target-word">
+          <span>Greek target</span>
+          <strong lang="el">αλεγκρό</strong>
+        </div>
+        <div class="mapping-note">
+          <span><b>ll</b> → <b lang="el">λ</b></span>
+          <span><b>g</b> → <b lang="el">γκ</b></span>
+          <span>order preserved</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="fact-strip" aria-label="Study summary">
+      <div class="shell facts">
+        <p><strong>4</strong><span>target scripts</span></p>
+        <p><strong>189,167</strong><span>training pairs</span></p>
+        <p><strong>0</strong><span>gold character alignments</span></p>
+        <p><strong>2</strong><span>learned directions per script</span></p>
+      </div>
+    </section>
+
+    <section class="section shell" id="method">
+      <div class="section-heading">
+        <p class="eyebrow">Method</p>
+        <h2>Alignment and cost learning reinforce each other</h2>
+        <p>
+          Character co-occurrence gives an initial cost matrix. DTW finds minimum-cost
+          paths, and the characters on those paths supply the counts for the next matrix.
+          The loop stops when the normalized cost converges.
+        </p>
+      </div>
+
+      <ol class="method-grid">
+        <li>
+          <span class="step-number">01</span>
+          <h3>Initialize</h3>
+          <p>Count cross-script character co-occurrences in every transliteration pair and convert them to costs.</p>
+        </li>
+        <li>
+          <span class="step-number">02</span>
+          <h3>Align</h3>
+          <p>Use DTW to recover an ordered minimum-cost path, including one-to-many and many-to-one steps.</p>
+        </li>
+        <li>
+          <span class="step-number">03</span>
+          <h3>Re-estimate</h3>
+          <p>Accumulate aligned character counts, normalize a new matrix, and repeat until convergence.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section visual-section" id="visualizations">
+      <div class="shell">
+        <div class="section-heading">
+          <p class="eyebrow">Training dynamics</p>
+          <h2>Watch the learned geometry emerge</h2>
+          <p>
+            Each animation begins with the co-occurrence initialization and advances one
+            training epoch at a time. Fixed color scales make changes directly comparable.
+          </p>
+        </div>
+
+        <div class="matrix-grid">
+          <figure class="media-card">
+            <div class="media-frame portrait">
+              <img src="assets/english_to_greek_epochs.gif" width="900" height="750"
+                   alt="Animated English-to-Greek character cost matrix over training epochs"
+                   loading="lazy" decoding="async">
+            </div>
+            <figcaption>
+              <span>English → Greek</span>
+              <p>Darker cells indicate lower learned character costs.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="media-card">
+            <div class="media-frame portrait">
+              <img src="assets/english_to_katakana_epochs.gif" width="900" height="750"
+                   alt="Animated English-to-Katakana character cost matrix over training epochs"
+                   loading="lazy" decoding="async">
+            </div>
+            <figcaption>
+              <span>English → Katakana</span>
+              <p>The same learning loop is applied to a much larger target alphabet.</p>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="section-heading compact">
+          <p class="eyebrow">Case study</p>
+          <h2>How the cost and path of <i>allegro</i> change</h2>
+        </div>
+
+        <div class="path-grid">
+          <figure class="media-card wide">
+            <div class="media-frame">
+              <img src="assets/allegro_to_greek_path.gif" width="1000" height="459"
+                   alt="Animated DTW path and cost for allegro to the Greek transliteration αλεγκρό"
+                   loading="lazy" decoding="async">
+            </div>
+            <figcaption>
+              <span><i>allegro</i> → <i lang="el">αλεγκρό</i></span>
+              <p>The path recovers repeated and one-to-many correspondences as the cost falls.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="media-card wide">
+            <div class="media-frame">
+              <img src="assets/allegro_to_katakana_path.gif" width="1000" height="459"
+                   alt="Animated DTW path and cost for allegro to the Katakana transliteration アッレグロ"
+                   loading="lazy" decoding="async">
+            </div>
+            <figcaption>
+              <span><i>allegro</i> → <i lang="ja">アッレグロ</i></span>
+              <p>Pink and blue segments expose many-to-one and one-to-many path steps.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell" id="results">
+      <div class="results-layout">
+        <div class="section-heading">
+          <p class="eyebrow">Evaluation</p>
+          <h2>Learned distance ranks ambiguous candidates</h2>
+          <p>
+            A phonetic encoder first narrows the search space. When a bucket contains
+            multiple candidates, learned DTW distance chooses the lowest-cost target.
+          </p>
+          <p class="caveat">
+            Retrieval accuracy is useful extrinsic evidence, but it does not prove that
+            an inferred alignment is the unique linguistically correct one.
+          </p>
+        </div>
+
+        <div class="result-card">
+          <p class="result-title">Multi-candidate top-1 accuracy</p>
+          <div class="result-row">
+            <span>Greek</span><div class="bar"><i style="--start: 64%; --width: 14%;"></i></div><strong>91.97%</strong>
+          </div>
+          <div class="result-row">
+            <span>Armenian</span><div class="bar"><i style="--start: 63%; --width: 23%;"></i></div><strong>93.53%</strong>
+          </div>
+          <div class="result-row">
+            <span>Katakana</span><div class="bar"><i style="--start: 7%; --width: 28%;"></i></div><strong>77.72%</strong>
+          </div>
+          <div class="result-row">
+            <span>Russian</span><div class="bar"><i style="--start: 49%; --width: 23%;"></i></div><strong>89.20%</strong>
+          </div>
+          <div class="axis" aria-hidden="true"><span>70%</span><span>85%</span><span>100%</span></div>
+          <p class="result-note">Bars show the range over six phonetic filters; labels show the best value.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reproduce-section" id="reproduce">
+      <div class="shell reproduce-layout">
+        <div class="section-heading">
+          <p class="eyebrow">Open and reproducible</p>
+          <h2>Generate the visualizations yourself</h2>
+          <p>
+            The repository contains the training implementation, dataset configuration,
+            DTW path extraction, and the scripts used for every animation on this page.
+          </p>
+          <a class="text-link" href="https://github.com/denizberkin/phonetic-distance#visualization">Full usage instructions →</a>
+        </div>
+
+        <div class="terminal" aria-label="Example commands">
+          <div class="terminal-bar"><span></span><span></span><span></span></div>
+          <pre><code><span class="comment"># Greek matrix and allegro alignment</span>
+python scripts/visualize_training_epochs.py
+
+<span class="comment"># Katakana matrix and allegro alignment</span>
+python scripts/visualize_training_epochs.py \
+  --language katakana --source allegro
+
+<span class="comment"># Run the training checks</span>
+python tests/test_training.py</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell citation-section" id="citation">
+      <div class="citation-copy">
+        <p class="eyebrow">Publication</p>
+        <h2>Paper and citation</h2>
+        <p>
+          Published at the 2025 33rd Signal Processing and Communications Applications
+          Conference (SIU).
+        </p>
+      </div>
+      <pre class="citation"><code>@inproceedings{ozbey2025crosslingual,
+  title  = {Cross-Lingual Phonetic Distance Learning via Transliteration Pairs},
+  author = {Özbey, Can and Kaplan, Emre and Kahya, Berkin Deniz},
+  booktitle = {2025 33rd Signal Processing and Communications Applications Conference (SIU)},
+  year   = {2025},
+  doi    = {10.1109/SIU66497.2025.11112305}
+}</code></pre>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-content">
+      <p><strong>Phonetic Edit Distance</strong><span>Learning across writing systems from paired names.</span></p>
+      <div>
+        <a href="https://doi.org/10.1109/SIU66497.2025.11112305">Paper</a>
+        <a href="https://github.com/denizberkin/phonetic-distance">GitHub</a>
+        <a href="#top">Back to top ↑</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
