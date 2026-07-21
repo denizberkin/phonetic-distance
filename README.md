@@ -12,16 +12,6 @@ $^1$ [Huawei Technologies](https://www.huawei.com/)
 $^2$ [Istanbul Technical University](https://www.itu.edu.tr/)
 $^3$ [Inzva](https://inzva.com/)
 
-## Project website
-
-The interactive project overview and training animations are published at
-[denizberkin.github.io/phonetic-distance](https://denizberkin.github.io/phonetic-distance/).
-The static site source lives in [`docs/`](docs/) and can be previewed locally with:
-
-```shell
-python -m http.server 8000 --directory docs
-```
-
 Then open <http://localhost:8000>.
 
 #### Cost matrix over training
@@ -37,6 +27,17 @@ Then open <http://localhost:8000>.
 ![DTW path for allegro to アッレグロ](assets/allegro_to_katakana_path.gif)
 
 Refer to [visualization section in readme](#visualization) for more details.
+
+
+## Project website
+
+The interactive project overview and training animations are published at
+[denizberkin.github.io/phonetic-distance](https://denizberkin.github.io/phonetic-distance/).
+The static site source lives in [`docs/`](docs/) and can be previewed locally with:
+
+```shell
+python -m http.server 8000 --directory docs
+```
 
 ## Requirements
 
