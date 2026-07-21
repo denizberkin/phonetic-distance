@@ -25,17 +25,17 @@ wd_<language>.normalized.aligned.tokens
 Each row contains three tab-separated fields:
 
 ```text
-latin_source    space separated target characters    occurrence_count
+latin_source\tspace separated target characters\toccurrence_count
 ```
 
 The configured datasets are:
 
 | Language | Data directory |
 | --- | --- |
-| Katakana | `netranslation-coling2018/data` |
-| Russian | `netranslation-coling2018/data` |
-| Armenian | `deepchar/data` |
-| Greek | `deepchar/data` |
+| Katakana | `data/netranslation-coling2018/data` |
+| Russian | `data/netranslation-coling2018/data` |
+| Armenian | `data/deepchar/data` |
+| Greek | `data/deepchar/data` |
 
 Dataset paths, enabled languages, and training settings live in
 [`dataset_config.toml`](dataset_config.toml). Language matching needs the exact name between `wd_{lang}.normalized.aligned.tokens`.
@@ -47,13 +47,13 @@ The source datasets come from
 
 Load every configured language:
 
-```powershell
+```shell
 conda run -n test python -B load_datasets.py
 ```
 
 Load or preview selected languages:
 
-```powershell
+```shell
 conda run -n test python -B load_datasets.py --language greek --preview 3
 conda run -n test python -B load_datasets.py --language greek --language armenian
 ```
@@ -75,13 +75,13 @@ preserved.
 
 Train both directions for every configured language:
 
-```powershell
+```shell
 conda run -n test python -B train.py
 ```
 
 Train one language or direction:
 
-```powershell
+```shell
 conda run -n test python -B train.py --language greek
 conda run -n test python -B train.py --language greek --direction english_to_target
 conda run -n test python -B train.py --language greek --direction target_to_english
@@ -154,7 +154,7 @@ frequencies.
 
 Generate the paper-style English-to-Greek heatmap:
 
-```powershell
+```shell
 conda run -n test python -B scripts\visualize_english_greek.py
 ```
 
@@ -166,7 +166,7 @@ This is just a replication script of conference paper cost matrix diagram.
 
 Run the training checks via:
 
-```powershell
+```shell
 conda run -n test python -B tests\test_training.py
 ```
 
@@ -175,6 +175,3 @@ conda run -n test python -B tests\test_training.py
 The method implemented here is based on
 [Cross-Lingual Phonetic Distance Learning via Transliteration Pairs](https://ieeexplore.ieee.org/document/11112305),
 published through IEEE.
-
-
-doi: https://doi.org/10.1109/SIU66497.2025.11112305
