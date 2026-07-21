@@ -239,10 +239,3 @@ python tests/test_training.py
 The method implemented here is based on
 [Cross-Lingual Phonetic Distance Learning via Transliteration Pairs](https://doi.org/10.1109/SIU66497.2025.11112305),
 published through IEEE.
-
-
-
-# NOTES
-
-To 9. Multi candidate results add:
-- black dot shows bla bla, blue line shows bla bla short legend.

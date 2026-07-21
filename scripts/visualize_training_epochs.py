@@ -14,6 +14,7 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 from matplotlib.collections import LineCollection
 from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -250,8 +251,8 @@ def save_pair_progression(
     figure, axes = plt.subplots(
         1,
         2,
-        figsize=(8.2, 3.9),
-        gridspec_kw={'wspace': 0.08},
+        figsize=(7.2, 3.9),
+        gridspec_kw={'wspace': 0.02},
         layout='constrained',
     )
 
@@ -276,7 +277,7 @@ def save_pair_progression(
         if index == 0:
             axis.set_ylabel('English source', fontsize=12)
         else:
-            axis.tick_params(axis='y', labelleft=False)
+            axis.tick_params(axis='y', left=False, labelleft=False)
         for (row, column), value in np.ndenumerate(pair_costs):
             axis.text(
                 column + 0.5,
@@ -310,24 +311,31 @@ def save_pair_progression(
             fontweight='normal',
         )
 
-    figure.canvas.draw()
-    left_box = axes[0].get_position()
-    right_box = axes[1].get_position()
-    figure.text(
-        (left_box.x1 + right_box.x0) / 2,
-        (left_box.y0 + left_box.y1) / 2,
-        r'$\longrightarrow$',
-        ha='center',
-        va='center',
-        color='#2E6F9E',
-        fontsize=24,
-    )
     figure.suptitle(
         f'{source} → {target}: first and final DTW paths',
         fontsize=16,
         fontweight='bold',
         color='#17324D',
     )
+    figure.canvas.draw()
+    figure.set_layout_engine(None)
+    left_box = axes[0].get_position()
+    right_box = axes[1].get_position()
+    gap = right_box.x0 - left_box.x1
+    y_center = (left_box.y0 + left_box.y1) / 2
+    arrow = FancyArrowPatch(
+        (left_box.x1 + 0.22 * gap, y_center),
+        (right_box.x0 - 0.22 * gap, y_center),
+        transform=figure.transFigure,
+        arrowstyle='-|>',
+        mutation_scale=12,
+        linewidth=2,
+        shrinkA=0,
+        shrinkB=0,
+        color='#2E6F9E',
+    )
+    arrow.set_in_layout(False)
+    figure.add_artist(arrow)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output_path, bbox_inches='tight')
     plt.close(figure)
