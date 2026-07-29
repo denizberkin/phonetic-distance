@@ -214,6 +214,11 @@ sup {
   letter-spacing: 0.07em;
 }
 
+.github-icon {
+  fill: currentColor;
+  flex: 0 0 auto;
+}
+
 .teaser {
   max-width: var(--measure);
   margin: 48px auto 54px;
@@ -247,10 +252,9 @@ figcaption {
 }
 
 .section:nth-of-type(even) {
-  max-width: none;
-  margin: 0;
-  padding-inline: max(20px, calc((100% - var(--text)) / 2));
   background: var(--soft);
+  box-shadow: 0 0 0 100vmax var(--soft);
+  clip-path: inset(0 -100vmax);
 }
 
 .section p,
@@ -290,12 +294,25 @@ figcaption {
   text-align: center;
 }
 
-#alignments {
+#training {
   max-width: var(--measure);
 }
 
+#alignments {
+  max-width: 1220px;
+  padding-inline: 20px;
+}
+
 #alignments > p {
-  max-width: var(--text);
+  max-width: 1040px;
+}
+
+#alignments figure {
+  max-width: 1160px;
+}
+
+#alignments figcaption {
+  max-width: 1040px;
 }
 
 #results {

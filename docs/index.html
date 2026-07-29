@@ -37,7 +37,12 @@
 
       <nav class="paper-links" aria-label="Project links">
         <a href="https://doi.org/10.1109/SIU66497.2025.11112305"><span aria-hidden="true">PDF</span> Paper</a>
-        <a href="https://github.com/denizberkin/phonetic-distance"><span aria-hidden="true">GH</span> Code</a>
+        <a href="https://github.com/denizberkin/phonetic-distance">
+          <svg class="github-icon" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16">
+            <path d="M8 0C3.58 0 0 3.67 0 8.2c0 3.62 2.29 6.69 5.47 7.77.4.08.55-.18.55-.4v-1.39c-2.23.5-2.69-1.1-2.69-1.1-.36-.95-.89-1.2-.89-1.2-.73-.51.06-.5.06-.5.8.06 1.22.85 1.22.85.72 1.26 1.88.9 2.34.69.07-.53.28-.9.51-1.1-1.78-.21-3.64-.91-3.64-4.04 0-.9.31-1.62.82-2.19-.08-.21-.36-1.04.08-2.16 0 0 .67-.22 2.2.84A7.45 7.45 0 0 1 8 4c.68 0 1.36.09 2 .27 1.53-1.06 2.2-.84 2.2-.84.44 1.12.16 1.95.08 2.16.51.57.82 1.3.82 2.19 0 3.14-1.87 3.83-3.65 4.03.29.26.54.76.54 1.53v2.27c0 .22.15.48.55.4A8.13 8.13 0 0 0 16 8.2C16 3.67 12.42 0 8 0Z"/>
+          </svg>
+          Code
+        </a>
         <a href="#citation"><span aria-hidden="true">BIB</span> Citation</a>
       </nav>
     </header>
@@ -51,24 +56,6 @@
         refines a directional phonetic cost matrix using DTW alignments.
       </figcaption>
     </figure>
-
-    <section class="section" id="abstract">
-      <h2>Abstract</h2>
-      <p>
-        We study how to learn phonetic edit distances between names written in different
-        scripts using only transliteration pairs. The method estimates directional
-        character-to-character cost matrices without IPA labels, handcrafted
-        correspondences, or gold character alignments.
-      </p>
-      <p>
-        The training procedure alternates between Dynamic Time Warping alignment and cost
-        re-estimation. An initial matrix is derived from character co-occurrence counts;
-        each iteration aligns the observed transliteration pairs, accumulates character
-        pair frequencies along the minimum-cost paths, and normalizes those frequencies
-        into the next cost matrix. English-to-target and target-to-English models are
-        trained independently.
-      </p>
-    </section>
 
     <section class="section" id="method">
       <h2>Method</h2>
@@ -98,7 +85,7 @@
     </section>
 
     <section class="section" id="training">
-      <h2>Training Dynamics</h2>
+      <h2>Training Progression of Cost Matrices</h2>
       <div class="figure-grid">
         <figure>
           <img src="assets/english_to_greek_epochs.gif" width="900" height="750"
@@ -222,7 +209,7 @@ python tests/test_training.py</code></pre>
 
   <footer class="site-footer">
     <p>
-      Cross-Lingual Phonetic Distance Learning via Transliteration Pairs.
+      Made with love above 3 sigma.
       <a href="#top">Back to top</a>
     </p>
   </footer>
