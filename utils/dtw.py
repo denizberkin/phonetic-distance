@@ -1,4 +1,4 @@
-"""Dynamic Time Warping for indexed character sequences."""
+"""Dynamic Time Warping for character sequences."""
 
 from __future__ import annotations
 

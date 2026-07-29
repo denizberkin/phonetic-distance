@@ -1,4 +1,7 @@
-"""Render the paper-style English-to-Greek cost matrix as SVG."""
+"""
+Render English-to-Greek cost matrix as SVG.
+- most of the stuff is hard coded - svg generation part is just generated code so idk if its worth checking.
+"""
 
 from __future__ import annotations
 

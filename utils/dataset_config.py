@@ -53,6 +53,7 @@ def read_settings(config_path: str | Path = DEFAULT_CONFIG_PATH) -> DatasetSetti
     except (KeyError, TypeError) as exc:
         raise DatasetError(f"Invalid dataset config in {path}: missing {exc}") from exc
 
+    # no need to check these but in case someone just wants to dive in without checking any code.
     if not languages or not all(isinstance(value, str) and value for value in languages):
         raise DatasetError("data.languages must be a non-empty list of strings")
     if not root_values or not all(isinstance(value, str) and value for value in root_values):

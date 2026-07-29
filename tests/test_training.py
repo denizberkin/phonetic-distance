@@ -12,6 +12,7 @@ from utils.training import _accumulate_path, train_cost_matrix
 
 
 def test_training() -> None:
+    """ some basic checks for DTW and cm training, not actually much of a test"""
     weights = np.zeros((2, 2), dtype=np.int64)
     source = np.array((0, 1))
     target = np.array((0, 1))

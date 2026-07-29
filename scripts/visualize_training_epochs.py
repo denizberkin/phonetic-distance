@@ -1,4 +1,8 @@
-'''Animate English-to-target cost learning and one example DTW path.'''
+"""
+Animate English-to-target cost learning and one example DTW path.
+- you may need to add your target if its not in [greek, russian, katakana] at the moment.
+- if you don't provide any sample string, defaults will be used (see EXAMPLE_SOURCES).
+"""
 
 from __future__ import annotations
 
