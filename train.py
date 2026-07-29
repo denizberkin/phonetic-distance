@@ -1,4 +1,8 @@
-"""Train and save directional phonetic cost matrices."""
+"""
+Train and save directional phonetic cost matrices.
+- main training logic is in utils/training.py
+- this script just handles data loading, argparsing, and results
+"""
 
 from __future__ import annotations
 

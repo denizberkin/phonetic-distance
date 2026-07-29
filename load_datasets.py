@@ -1,4 +1,5 @@
-"""Load normalized named-entity transliteration pairs from ``*.tokens`` files.
+"""
+Load normalized transliteration pairs from ``*.tokens`` files.
 
 The token files contain three tab-separated fields per row:
 
@@ -67,7 +68,7 @@ def iter_token_file(
     *,
     encoding: str = "utf-8",
 ) -> Iterator[TransliterationPair]:
-    """Parse single token file yield pairs."""
+    """Parse single token file and yield pairs."""
 
     token_path = Path(path).resolve()
     skipped = 0
